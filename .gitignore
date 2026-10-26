@@ -1,0 +1,25 @@
+# Publish only explicitly reviewed public sources. Private working files stay local.
+/*
+!/.gitignore
+!/README.md
+!/demo/
+!/scripts/
+
+**/.DS_Store
+**/node_modules/
+**/__pycache__/
+**/*.pyc
+**/.env
+**/.env.*
+**/*.xlsx
+**/*.xls
+**/*.csv
+**/*.ndjson
+**/*.pdf
+**/*.docx
+**/*.png
+**/*.jpg
+**/*.JPG
+**/*.jpeg
+**/*.zip
+**/*backup*

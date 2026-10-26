@@ -1,0 +1,11 @@
+const fs=require('node:fs'),vm=require('node:vm'),assert=require('node:assert/strict');
+const ctx=vm.createContext({document:{addEventListener(){}},localStorage:{getItem:()=>JSON.stringify(ctx.rows||[])},dxE:v=>String(v).replaceAll('<','&lt;'),dvIcon:()=>'<svg></svg>'});
+vm.runInContext(fs.readFileSync(__dirname+'/strategic-impact.js','utf8'),ctx);const run=s=>vm.runInContext(s,ctx);
+assert.equal(run('siNumbers({earlyTotal:-1})'),null);assert.equal(run('siNumbers({earlyTotal:5,earlyPublic:6})'),null);assert.equal(run('siNumbers({hardCount:3,investedCount:2})'),null);assert.equal(run('siNumbers({hardCount:1.5})'),null);
+run(`const c={id:'P1',object:{type:'region',region:'shenzhen',name:'湾区'},year:2025,asOf:'2025-12-31',evidence:[{id:'E1',date:'2025-12-31',status:'verified'}],impact:{status:'verified',at:'2026-01-01',note:'<原件>已核查',refs:['E1'],values:{earlyTotal:12,earlyPublic:3,socialPaid:0,hardCount:6,investedCount:10}}}`);
+assert.equal(run('siResult(c).multiple'),4);assert.equal(run('siResult(c).coverage'),60);assert.equal(run('siResult(c).socialPaid'),0);
+ctx.rows=[run('c')];assert.match(run('siCards("shenzhen")'),/4 倍/);assert.match(run('siCards("shenzhen")'),/0 亿元/);assert.match(run('siCards("shenzhen")'),/6 \/ 10 家/);assert(!run('siCards("shenzhen")').includes('<原件>'));
+run('c.impact.values.earlyPublic=0');assert.equal(run('siResult(c).multiple'),null);run('c.impact.values.investedCount=0;c.impact.values.hardCount=0');assert.equal(run('siResult(c).coverage'),null);
+run('c.evidence[0].status="pending"');assert.equal(run('siResult(c)'),null);ctx.rows=[run('c')];assert.match(run('siCards("shenzhen")'),/待补充/);assert(!run('siCards("shenzhen")').includes('4 倍'));
+run('c.evidence[0].status="verified";c.evidence[0].date="2026-01-01"');assert.equal(run('siResult(c)'),null);
+console.log('strategic impact: paid vs requested isolation, same-cohort leverage, unique company coverage, zero vs missing, zero denominator, period/evidence gates and escaped output OK');

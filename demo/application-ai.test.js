@@ -1,0 +1,28 @@
+const fs=require('node:fs'),vm=require('node:vm'),assert=require('node:assert/strict');
+let fail=false;const storage=new Map(),events={};const ctx=vm.createContext({console,Date,JSON,Math,labels:{},renderers:{},localStorage:{getItem:k=>storage.get(k)||null,setItem:(k,v)=>{if(fail)throw Error('quota');storage.set(k,v)}},document:{addEventListener:(n,f)=>(events[n]??=[]).push(f)},escapeHTML:v=>String(v).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;')});
+for(const file of ['application-review.js','application-ai.js'])vm.runInContext(fs.readFileSync(__dirname+'/'+file,'utf8'),ctx);const run=s=>vm.runInContext(s,ctx);
+assert.equal(run('arStore.apps.filter(aaEligible).length'),3);
+assert.throws(()=>run("aaRun(['AR-SAMPLE-1'])"),/未报送/);
+run("const n=aaRun(['AR-SAMPLE-5','AR-SAMPLE-1']);");assert.equal(run('n.rows.length'),1);assert.equal(run('n.skipped'),1);assert.match(run('aaPage()'),/未调用真实模型/);assert.match(run('aaPage()'),/区域正式报送版本/);
+run("arStore.apps[4].materials.identity.excerpt='LIVE UNREPORTED EDIT'");assert(!run("aaAnalyze(arStore.apps[4]).evidence.some(e=>e.excerpt==='LIVE UNREPORTED EDIT')"));assert.equal(run('aaStale(n.rows[0])'),false);
+run("let role={id:'r1',version:'region',role:'reviewer',name:'甲',organization:'区域'};function fsAccount(){return role};const fsRegion={id:'shenzhen'};function fsRender(){};");
+assert.equal(run('aaCurrentRun()'),null);assert.equal(run('arStore.apps.filter(aaEligible).length'),5);
+run("const a=arStore.apps[0];a.materials.identity.extracted=[{name:'sample.txt',text:'主体代码：WRONG-CODE 申请出资（亿元）：999'}];const r=aaRun([a.id]);");
+assert(run('r.rows[0].findings.some(f=>f.title.includes("主体标识"))'));assert(run('r.rows[0].findings.some(f=>f.title.includes("金额口径"))'));assert(!run('r.rows[0].findings.some(f=>f.title.includes("违规事实"))'));
+assert.equal(run('aaDeclared("申请出资：999万元").request'),null);
+assert.equal(run('aaDeclared("IRR 30% / 股权出资999亿元").request'),null);
+run("const old=JSON.stringify({stage:a.stage,gates:a.gates,scores:a.scores,reviews:a.reviews});");assert.throws(()=>run("aaAccept(r.id,a.id,'同意留存',false)"),/核阅/);
+run("a.revision++");assert.equal(run('aaStale(r.rows[0])'),true);assert.throws(()=>run("aaAccept(r.id,a.id,'核验',true)"),/版本/);run('a.revision--');
+run("aaAccept(r.id,a.id,'保留待核线索，补充主体与金额依据',true)");assert.equal(run('JSON.stringify({stage:a.stage,gates:a.gates,scores:a.scores,reviews:a.reviews})'),run('old'));assert.equal(run('a.questions.at(-1).source'),'local-evidence-assistant');assert.equal(run('r.rows[0].accepted'),true);
+assert.throws(()=>run("aaAccept(r.id,a.id,'重复',true)"),/版本|重复/);
+run("role={...role,role:'reporter'};const r2=aaRun([a.id]);");assert.throws(()=>run("aaAccept(r2.id,a.id,'核阅',true)"),/审核员/);
+run("role={...role,role:'reviewer'};a.materials.team.excerpt='<script>alert(1)</script>';aaRun([a.id]);");assert(!run('aaPage()').includes('<script>'));assert(run('aaPage()').includes('&lt;script&gt;'));
+const count=run('arStore.aiRuns.length');fail=true;assert.equal(run('aaRun([a.id])'),null);assert.equal(run('arStore.aiRuns.length'),count);
+console.log('AI local review: scoped frozen evidence, declared-field consistency, provenance, stale drafts, human-only adoption, no scoring/decision mutations, escaping, rollback OK');
+(async()=>{
+ fail=false;run("arUI.id=arStore.apps[0].id;role={...role,role:'reviewer'};arFileStore=async()=>true;globalThis.crypto={subtle:null};globalThis.FormData=class{constructor(){return [][Symbol.iterator]()}};pfExtract=async()=>({text:'本机提取的待核材料',parser:'TXT',truncated:false});");
+ const input={id:'upload',disabled:false,dataset:{arUpload:'identity'},files:[{name:'test.txt',size:30,type:'text/plain',arrayBuffer:async()=>new ArrayBuffer(0)}],matches:q=>q==='[data-ar-upload]',closest:()=>null};
+ await events.change[0]({target:input});assert.equal(run('arCurrent().materials.identity.status'),'received');assert.equal(run('arCurrent().materials.identity.extracted.at(-1).text'),'本机提取的待核材料');assert.equal(run('arCurrent().gates.entity'),undefined);
+ run("pfExtract=async()=>{throw Error('扫描件没有可用文字')}");await events.change[0]({target:input});assert.equal(run('arCurrent().materials.identity.extracted.at(-1).error'),'扫描件没有可用文字');assert.equal(run('arCurrent().materials.identity.files.length'),2);assert.equal(run('arCurrent().materials.identity.status'),'received');
+ console.log('AI attachments: local extraction, original retention on parse failure, received not verified, old conclusions invalidated OK');
+})().catch(e=>{console.error(e);process.exitCode=1});

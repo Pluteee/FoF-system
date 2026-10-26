@@ -1,0 +1,120 @@
+// 公开虚构情景。区域基金、管理机构、企业、金额及投资关系均为演示，不代表真实投资。
+const demoScenario = {
+  asOf: '2026-10-16',
+  regions: {
+    shenzhen: { manager:'演示·鹏湾母基金管理机构', strategy:'硬科技、早期与湾区协同', phase:'投资期', established:'2025-12-22', commitment:120, paid:36, annualPlan:24, annualInvestPlan:18, reportDate:'2026-09-30', investors:'国家引导基金、区域出资人与社会资本（结构演示）' },
+    shanghai: { manager:'演示·申澜母基金管理机构', strategy:'集成电路、生物医药与未来产业', phase:'投资期', established:'2025-12-23', commitment:110, paid:30, annualPlan:22, annualInvestPlan:16, reportDate:'2026-09-30', investors:'国家引导基金、长三角区域出资人与社会资本（结构演示）' },
+    beijing: { manager:'演示·燕序母基金管理机构', strategy:'人工智能、先进制造与科技成果转化', phase:'投资期', established:'2025-12-24', commitment:115, paid:32, annualPlan:23, annualInvestPlan:17, reportDate:'2026-09-30', investors:'国家引导基金、京津冀区域出资人与社会资本（结构演示）' }
+  },
+  funds: [
+    {id:'DMF-SH-01',region:'shanghai',name:'长三角先导集成电路创业投资基金（演示）',manager:'申浦科创投资管理（演示）',sector:'集成电路',place:'上海市浦东新区',size:8,request:2.4},
+    {id:'DMF-SH-02',region:'shanghai',name:'长三角生命科学早期基金（演示）',manager:'澜桥资本管理（演示）',sector:'生物医药',place:'江苏省苏州市工业园区',size:6,request:1.8},
+    {id:'DMF-SH-03',region:'shanghai',name:'长三角具身智能种子基金（演示）',manager:'浦江创新资本（演示）',sector:'人工智能',place:'江苏省无锡市滨湖区',size:5,request:1.5},
+    {id:'DMF-SH-04',region:'shanghai',name:'长三角智能制造协同基金（演示）',manager:'演示·南棠投资管理机构',sector:'高端装备制造',place:'浙江省杭州市滨江区',size:7.2,request:2.0},
+    {id:'DMF-BJ-01',region:'beijing',name:'京津冀人工智能源头基金（演示）',manager:'首科创业投资管理（演示）',sector:'人工智能',place:'北京市海淀区',size:7,request:2.1},
+    {id:'DMF-BJ-02',region:'beijing',name:'京津冀先进制造协同基金（演示）',manager:'北辰产业资本（演示）',sector:'高端装备制造',place:'天津市滨海新区',size:9,request:2.7},
+    {id:'DMF-BJ-03',region:'beijing',name:'京津冀新材料转化基金（演示）',manager:'燕创资本管理（演示）',sector:'新材料',place:'河北省石家庄市高新区',size:5,request:1.5},
+    {id:'DMF-BJ-04',region:'beijing',name:'京津冀机器人产业协同基金（演示）',manager:'演示·南棠投资管理机构',sector:'高端装备制造',place:'河北省廊坊市广阳区',size:6.8,request:1.9}
+  ],
+  deals: [
+    {id:'DMD-SH-01',region:'shanghai',name:'澜图具身机器人（演示）',place:'上海市',sector:'人工智能',summary:'灵巧手与工业具身智能控制系统',round:1.2,request:0.3},
+    {id:'DMD-SH-02',region:'shanghai',name:'浦芯微电子（演示）',place:'上海市',sector:'集成电路',summary:'先进封装与高速互联芯片',round:1.8,request:0.4},
+    {id:'DMD-SH-03',region:'shanghai',name:'云岚生物（演示）',place:'苏州市',sector:'生物医药',summary:'创新药早期研发平台',round:0.9,request:0.2},
+    {id:'DMD-SH-04',region:'shanghai',name:'杭智工业软件（演示）',place:'浙江省杭州市',sector:'人工智能',summary:'工业数字孪生与智能调度系统',round:0.7,request:0.16},
+    {id:'DMD-SH-05',region:'shanghai',name:'锡微先进封装（演示）',place:'江苏省无锡市',sector:'集成电路',summary:'先进封装材料及工艺平台',round:0.9,request:0.20},
+    {id:'DMD-BJ-01',region:'beijing',name:'澜图具身机器人（演示）',place:'上海市',sector:'人工智能',summary:'同一主体的跨区域投资路径演示',round:1.5,request:0.25},
+    {id:'DMD-BJ-02',region:'beijing',name:'北辰星航（演示）',place:'北京市',sector:'高端装备制造',summary:'商业航天关键部组件',round:2,request:0.5},
+    {id:'DMD-BJ-03',region:'beijing',name:'燕材科技（演示）',place:'天津市',sector:'新材料',summary:'先进复合材料中试与产业化',round:1,request:0.2},
+    {id:'DMD-BJ-04',region:'beijing',name:'冀材转化科技（演示）',place:'河北省石家庄市',sector:'新材料',summary:'功能材料中试与产业化',round:0.8,request:0.16},
+    {id:'DMD-BJ-05',region:'beijing',name:'廊坊智造装备（演示）',place:'河北省廊坊市',sector:'高端装备制造',summary:'智能制造核心装备与系统集成',round:0.6,request:0.14}
+  ],
+  // 路径金额单位均为亿元。indirect = 子基金对企业投资额 × 区域基金在子基金中的模拟份额，仅用于方法演示。
+  paths: [
+    {enterprise:'澜图具身机器人（演示）',sector:'人工智能',place:'上海市',region:'shenzhen',kind:'indirect',fundId:'SF04',invest:0.48,share:0.23,date:'2026-06-18'},
+    {enterprise:'澜图具身机器人（演示）',sector:'人工智能',place:'上海市',region:'shanghai',kind:'direct',dealId:'DMD-SH-01',invest:0.30},
+    {enterprise:'澜图具身机器人（演示）',sector:'人工智能',place:'上海市',region:'beijing',kind:'direct',dealId:'DMD-BJ-01',invest:0.25},
+    {enterprise:'澜图具身机器人（演示）',sector:'人工智能',place:'上海市',region:'shanghai',kind:'indirect',fundId:'DMF-SH-04',invest:0.38,share:0.278,date:'2026-07-09'},
+    {enterprise:'澜图具身机器人（演示）',sector:'人工智能',place:'上海市',region:'beijing',kind:'indirect',fundId:'DMF-BJ-04',invest:0.42,share:0.279,date:'2026-07-16'},
+    {enterprise:'浦芯微电子（演示）',sector:'集成电路',place:'上海市',region:'shanghai',kind:'indirect',fundId:'DMF-SH-01',invest:0.62,share:0.30,date:'2026-06-25'},
+    {enterprise:'浦芯微电子（演示）',sector:'集成电路',place:'上海市',region:'shanghai',kind:'direct',dealId:'DMD-SH-02',invest:0.40},
+    {enterprise:'浦芯微电子（演示）',sector:'集成电路',place:'上海市',region:'beijing',kind:'indirect',fundId:'DMF-BJ-01',invest:0.25,share:0.27,date:'2026-08-04'},
+    {enterprise:'云岚生物（演示）',sector:'生物医药',place:'苏州市',region:'shenzhen',kind:'indirect',fundId:'SF05',invest:0.30,share:0.30,date:'2026-08-14'},
+    {enterprise:'云岚生物（演示）',sector:'生物医药',place:'苏州市',region:'shanghai',kind:'direct',dealId:'DMD-SH-03',invest:0.20},
+    {enterprise:'北辰星航（演示）',sector:'高端装备制造',place:'北京市',region:'beijing',kind:'indirect',fundId:'DMF-BJ-02',invest:0.75,share:0.30,date:'2026-05-28'},
+    {enterprise:'北辰星航（演示）',sector:'高端装备制造',place:'北京市',region:'beijing',kind:'direct',dealId:'DMD-BJ-02',invest:0.50},
+    {enterprise:'燕材科技（演示）',sector:'新材料',place:'天津市',region:'beijing',kind:'indirect',fundId:'DMF-BJ-03',invest:0.36,share:0.30,date:'2026-06-30'},
+    {enterprise:'燕材科技（演示）',sector:'新材料',place:'天津市',region:'beijing',kind:'direct',dealId:'DMD-BJ-03',invest:0.20},
+    {enterprise:'深岚边缘智能（演示）',sector:'人工智能',place:'广东省深圳市',region:'shenzhen',kind:'indirect',fundId:'SF04',invest:0.22,share:0.23,date:'2026-10-12'},
+    {enterprise:'莞创精密机器人（演示）',sector:'高端装备制造',place:'广东省东莞市',region:'shenzhen',kind:'indirect',fundId:'SF04',invest:0.16,share:0.23,date:'2026-10-06'},
+    {enterprise:'穗芯算力科技（演示）',sector:'集成电路',place:'广东省广州市',region:'shenzhen',kind:'indirect',fundId:'SF07',invest:0.18,share:0.28,date:'2026-10-09'},
+    {enterprise:'鹏湾低空传感（演示）',sector:'高端装备制造',place:'广东省深圳市',region:'shenzhen',kind:'indirect',fundId:'SF07',invest:0.13,share:0.28,date:'2026-09-26'},
+    {enterprise:'湾区智药平台（演示）',sector:'生物医药',place:'广东省广州市',region:'shenzhen',kind:'indirect',fundId:'SF05',invest:0.19,share:0.30,date:'2026-08-23'},
+    {enterprise:'芯程微纳（演示）',sector:'集成电路',place:'广东省深圳市',region:'shenzhen',kind:'indirect',fundId:'SF12',invest:0.20,share:0.25,date:'2026-07-15'},
+    {enterprise:'杭智工业软件（演示）',sector:'人工智能',place:'浙江省杭州市',region:'shanghai',kind:'indirect',fundId:'DMF-SH-04',invest:0.16,share:0.278,date:'2026-10-11'},
+    {enterprise:'锡微先进封装（演示）',sector:'集成电路',place:'江苏省无锡市',region:'shanghai',kind:'indirect',fundId:'DMF-SH-01',invest:0.23,share:0.30,date:'2026-09-30'},
+    {enterprise:'苏桥细胞科技（演示）',sector:'生物医药',place:'江苏省苏州市',region:'shanghai',kind:'indirect',fundId:'DMF-SH-02',invest:0.18,share:0.30,date:'2026-10-05'},
+    {enterprise:'浦江感知智能（演示）',sector:'人工智能',place:'上海市',region:'shanghai',kind:'indirect',fundId:'DMF-SH-03',invest:0.17,share:0.30,date:'2026-09-18'},
+    {enterprise:'廊坊智造装备（演示）',sector:'高端装备制造',place:'河北省廊坊市',region:'beijing',kind:'indirect',fundId:'DMF-BJ-02',invest:0.19,share:0.30,date:'2026-10-10'},
+    {enterprise:'冀材转化科技（演示）',sector:'新材料',place:'河北省石家庄市',region:'beijing',kind:'indirect',fundId:'DMF-BJ-03',invest:0.18,share:0.30,date:'2026-09-24'},
+    {enterprise:'海淀灵思科技（演示）',sector:'人工智能',place:'北京市',region:'beijing',kind:'indirect',fundId:'DMF-BJ-01',invest:0.20,share:0.27,date:'2026-10-02'},
+    {enterprise:'星维芯片（演示）',sector:'集成电路',place:'广东省深圳市',region:'shenzhen',kind:'indirect',fundId:'SF01',invest:0.26,share:0.19,date:'2026-06-21'},
+    {enterprise:'智序算力（演示）',sector:'人工智能',place:'广东省深圳市',region:'shenzhen',kind:'indirect',fundId:'SF01',invest:0.18,share:0.19,date:'2026-09-26'},
+    {enterprise:'光栅通信（演示）',sector:'通信网络',place:'广东省珠海市',region:'shenzhen',kind:'indirect',fundId:'SF01',invest:0.14,share:0.19,date:'2026-10-08'}
+  ],
+  updates: [
+    {date:'2026-10-15',region:'shenzhen',type:'新获融资',enterprise:'深岚边缘智能（演示）',fundId:'SF04',title:'完成新一轮战略融资',detail:'计划扩大边缘智能产品在制造场景的交付。'},
+    {date:'2026-10-12',region:'shenzhen',type:'荣誉资质',enterprise:'穗芯算力科技（演示）',fundId:'SF07',title:'入选省级专精特新企业名单',detail:'子基金底层项目的运营演示，不计入深圳直投演示样本统计。'},
+    {date:'2026-10-08',region:'shenzhen',type:'新获融资',enterprise:'云岚生物（演示）',fundId:'SF05',title:'完成 Pre-A 轮融资',detail:'用于创新药研发平台扩建。'},
+    {date:'2026-09-29',region:'shenzhen',type:'荣誉资质',enterprise:'鹏湾低空传感（演示）',fundId:'SF07',title:'获得高新技术企业认定',detail:'低空感知模组完成关键测试。'},
+    {date:'2026-10-14',region:'shanghai',type:'新获融资',enterprise:'浦芯微电子（演示）',dealId:'DMD-SH-02',title:'完成 B 轮融资',detail:'先进封装产线进入扩产阶段。'},
+    {date:'2026-10-09',region:'shanghai',type:'荣誉资质',enterprise:'苏桥细胞科技（演示）',fundId:'DMF-SH-02',title:'获得省级研发平台认定',detail:'细胞治疗研发平台通过阶段评审。'},
+    {date:'2026-10-01',region:'shanghai',type:'产品进展',enterprise:'杭智工业软件（演示）',dealId:'DMD-SH-04',title:'发布工业调度系统新版本',detail:'新增多工厂协同排产能力。'},
+    {date:'2026-10-13',region:'beijing',type:'荣誉资质',enterprise:'北辰星航（演示）',dealId:'DMD-BJ-02',title:'入选商业航天创新示范项目',detail:'核心部组件完成在轨验证。'},
+    {date:'2026-10-07',region:'beijing',type:'新获融资',enterprise:'海淀灵思科技（演示）',fundId:'DMF-BJ-01',title:'完成天使轮融资',detail:'用于多模态技术研发。'},
+    {date:'2026-09-27',region:'beijing',type:'荣誉资质',enterprise:'廊坊智造装备（演示）',fundId:'DMF-BJ-02',title:'获得专精特新中小企业认定',detail:'产线关键装备进入客户验证。'},
+    {date:'2026-10-11',region:'shenzhen',type:'新获融资',enterprise:'智序算力（演示）',fundId:'SF01',title:'完成 A 轮融资',detail:'用于新一代边缘算力产品量产。'},
+    {date:'2026-10-03',region:'shenzhen',type:'荣誉资质',enterprise:'星维芯片（演示）',fundId:'SF01',title:'获得专精特新企业认定',detail:'芯片验证与客户导入进入下一阶段。'}
+  ],
+  // Independent company-financing examples: [latest known round, post-money valuation in CNY 100m].
+  // Null means undisclosed. Never derive valuation from financing size or investment amount.
+  enterpriseProfileAsOf:'2026-10-16',
+  enterpriseProfiles:{
+    '澜图具身机器人（演示）':['B轮',28],
+    '浦芯微电子（演示）':['B轮',18],
+    '云岚生物（演示）':['Pre-A',3.6],
+    '北辰星航（演示）':['C轮及以后',45],
+    '燕材科技（演示）':['A轮',8],
+    '深岚边缘智能（演示）':['战略/其他',5.8],
+    '莞创精密机器人（演示）':['A轮',4.5],
+    '穗芯算力科技（演示）':['Pre-A',2.4],
+    '鹏湾低空传感（演示）':[null,null],
+    '湾区智药平台（演示）':['种子/天使',0.8],
+    '芯程微纳（演示）':[null,6.5],
+    '杭智工业软件（演示）':['A轮',9.2],
+    '锡微先进封装（演示）':['Pre-A',3.2],
+    '苏桥细胞科技（演示）':['种子/天使',0.6],
+    '浦江感知智能（演示）':['A轮',7.5],
+    '廊坊智造装备（演示）':['A轮',4.8],
+    '冀材转化科技（演示）':['Pre-A',1.8],
+    '海淀灵思科技（演示）':['种子/天使',0.9],
+    '星维芯片（演示）':['Pre-A',2.8],
+    '智序算力（演示）':['A轮',8.6],
+    '光栅通信（演示）':['Pre-A',null]
+  },
+  fundPerformance: {
+    SF01:{tvpi:1.14,dpi:0.08,irr:6.8,nav:0.51},
+    SF04:{tvpi:1.18,dpi:0.12,irr:8.6,nav:0.92},
+    SF05:{tvpi:1.12,dpi:0,irr:6.3,nav:0.66},
+    SF07:{tvpi:1.09,dpi:0,irr:5.2,nav:0.57},
+    'DMF-SH-01':{tvpi:1.16,dpi:0.15,irr:7.8,nav:1.44},
+    'DMF-SH-04':{tvpi:1.13,dpi:0,irr:6.9,nav:1.13},
+    'DMF-BJ-02':{tvpi:1.21,dpi:0.18,irr:9.2,nav:1.62},
+    'DMF-BJ-03':{tvpi:1.08,dpi:0,irr:4.7,nav:0.81}
+  },
+  fundExits: [
+    {fundId:'SF01',enterprise:'星维芯片（演示）',date:'2026-09-16',type:'部分退出',proceeds:0.04,returnMultiple:1.38},
+    {fundId:'SF04',enterprise:'澜图具身机器人（演示）',date:'2026-09-08',type:'部分退出',proceeds:0.06,returnMultiple:1.45},
+    {fundId:'DMF-SH-01',enterprise:'浦芯微电子（演示）',date:'2026-08-22',type:'部分退出',proceeds:0.12,returnMultiple:1.32},
+    {fundId:'DMF-BJ-02',enterprise:'北辰星航（演示）',date:'2026-09-15',type:'部分退出',proceeds:0.18,returnMultiple:1.51}
+  ]
+};

@@ -1,0 +1,55 @@
+const fs=require('node:fs'),vm=require('node:vm'),assert=require('node:assert/strict');
+const storage=new Map(),handlers={};let fail=false;
+const ctx=vm.createContext({console,document:{addEventListener:(type,fn)=>(handlers[type]??=[]).push(fn)},localStorage:{getItem:k=>storage.get(k)??null,setItem:(k,v)=>{if(fail)throw Error('quota');storage.set(k,v)}},labels:{},renderers:{},escapeHTML:v=>String(v??'').replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;'),requestAnimationFrame(){}});
+const run=s=>vm.runInContext(s,ctx);
+run(`const dxRegions=[{id:'sz',city:'深圳'},{id:'sh',city:'上海'}],dxRegion=id=>dxRegions.find(r=>r.id===id),dxDealCompany=s=>s.replace(/（第二轮）$/,''),dxFunds=[{id:'F1',region:'sz',name:'本区基金'},{id:'F2',region:'sh',name:'外区基金'}],dxPaths=[{enterprise:'企业甲',kind:'indirect',region:'sz',fundId:'F1'},{enterprise:'企业甲',kind:'indirect',region:'sh',fundId:'F2'},{enterprise:'企业乙',kind:'indirect',region:'sh',fundId:'F2'}],dxDeals=[{id:'D1',name:'企业甲',region:'sz',request:999},{id:'D2',name:'企业甲（第二轮）',region:'sz',request:999}];`);
+vm.runInContext(fs.readFileSync(__dirname+'/risk-monitor.js','utf8'),ctx);
+assert.equal(run('rmProjects().length'),2);assert.equal(run('rmProjects().find(p=>p.name==="企业甲").regions.length'),2);
+assert.equal(run('rmLatest("企业甲")'),null);assert.equal(run('rmSignals(null,rmToday())[0].level'),'blue');
+assert.equal(run('rmValues({cashMonths:"",compliance:false}).cashMonths'),null);assert.equal(run('rmValues({compliance:false}).compliance'),false);
+assert.throws(()=>run('rmValues({customerShare:101})'));assert.throws(()=>run('rmValues({debtDays:1.5})'));assert.throws(()=>run('rmValues({revenueYoY:-101})'));
+run(`const today=rmToday(),full={cashMonths:8,revenueYoY:5,debtDays:0,customerShare:30,techDays:0,exitDays:0,keyPerson:false,compliance:false},base={asOf:today,values:full};`);
+assert.equal(run('rmSignals(base,today).length'),0);
+for(const [field,value,rule,level] of [['cashMonths',1,'cash','red'],['cashMonths',3,'cash','orange'],['cashMonths',6,'cash','yellow'],['revenueYoY',-30,'revenue','orange'],['revenueYoY',-15,'revenue','yellow'],['debtDays',90,'debt','red'],['debtDays',30,'debt','orange'],['customerShare',70,'customer','yellow'],['techDays',90,'technology','orange'],['exitDays',180,'exit','orange'],['keyPerson',true,'person','orange']])assert.equal(run(`rmSignals({...base,values:{...full,${field}:${value}}},today).find(s=>s.rule==='${rule}').level`),level);
+assert.equal(run('rmSignals({asOf:"2020-01-01",values:{...full,cashMonths:1}},today).some(s=>s.rule==="cash")'),false);assert.equal(run('rmSignals({asOf:"2020-01-01",values:full},today)[0].rule'),'stale');
+run(`rmStore.evidence.push({id:'EV',scope:'national',demo:false,project:'企业甲',date:today,status:'verified',locator:'财报第1页',excerpt:'现金预算和借款明细',title:'核验材料'});const snapshot={id:'S1',project:'企业甲',scope:'national',demo:false,asOf:today,at:rmNow(),values:{...full,cashMonths:2},note:'核验完毕',refs:['EV']};rmStore.snapshots.push(snapshot);`);
+assert.equal(run('rmLatest("企业甲").id'),'S1');
+run(`const scan1=rmCommit(()=>rmScan([rmProjects().find(p=>p.name==='企业甲')]));`);assert.equal(run('scan1.newCount'),1);assert.equal(run('rmEvents()[0].status'),'待核查');
+assert.equal(run('rmCommit(()=>rmScan([rmProjects()[0]])).newCount'),0);assert.equal(run('rmStore.events.length'),1);
+run(`const event1=rmStore.events[0];`);
+assert.throws(()=>run(`rmTransition(event1,'submit',{note:'未核查就提交',refs:['EV']})`),/不能跳过/);
+assert.throws(()=>run(`rmTransition(event1,'verify',{note:'无依据',refs:[]})`),/证据/);
+run(`rmTransition(event1,'verify',{note:'核查现金预算',refs:['EV']});rmTransition(event1,'assign',{note:'落实责任',owner:'风控甲',due:today,plan:'滚动现金预算和融资方案审批'});rmTransition(event1,'progress',{note:'已完成访谈'});rmTransition(event1,'submit',{note:'现金计划和资金到账已核对',refs:['EV']});rmTransition(event1,'close',{note:'核验到账凭据与复核意见',refs:['EV']});`);
+assert.equal(run('event1.status'),'已关闭');run(`const frozen=rmReport();`);
+run(`rmScan([rmProjects()[0]])`);assert.equal(run('rmStore.events.length'),1); // Same pre-closure observation must not manufacture recurrence.
+run(`rmStore.snapshots.push({...snapshot,id:'S2',at:rmNow()});rmScan([rmProjects()[0]])`);assert.equal(run('rmStore.events.length'),2);assert.equal(run('rmStore.events[1].previous'),run('event1.id'));
+run(`rmStore.evidence[0].status='pending';rmInvalidateEvidence('EV')`);assert.equal(run('rmLatest("企业甲")'),null);assert.equal(run('event1.status'),'待核查');assert.equal(run('frozen.events[0].status'),'已关闭');
+assert.equal(run('rmSignals(rmLatest("企业甲"),today)[0].rule'),'missing');
+const before=run('rmStore.events.length');fail=true;assert.throws(()=>run('rmCommit(()=>rmStore.events.pop())'),/撤回/);assert.equal(run('rmStore.events.length'),before);fail=false;
+run(`let role={id:'region-a',name:'区域审核',version:'region',role:'reviewer'};function fsAccount(){return role};const fsRegion={id:'sz'},fsFund={id:'F1'};`);
+assert.equal(run('rmProjects().length'),1);assert.equal(run('rmProjects()[0].paths.some(p=>p.region==="sh")'),false);assert.equal(run('rmEvents().length'),0);
+run(`rmStore.evidence.push({id:'EVR',scope:'region:sz',demo:false,project:'企业甲',date:today,status:'verified',locator:'已核查材料第1页',excerpt:'事实',title:'本区域'});rmStore.snapshots.push({...snapshot,id:'SR',scope:'region:sz',refs:['EVR'],invalidated:false});`);
+assert.equal(run('rmLatest("企业甲").scope'),'region:sz');
+run(`role={...role,id:'fund-a',version:'fund',role:'reporter'}`);assert.equal(run('rmProjects()[0].paths.length'),1);assert.equal(run('rmLatest("企业甲")'),null);
+run(`role={...role,id:'national',version:'national',role:'reviewer'};rmUI.actor=rmActor();`);
+for(const tab of ['radar','events','data','rules','reports'])assert.match(run(`rmUI.tab='${tab}';rmUI.event='';rmPage()`),/风险监测/);
+run(`rmUI.event=rmStore.events[0].id`);assert.match(run('rmPage()'),/全过程留痕/);
+run(`rmUI.demo=true;rmDemo();rmScan();`);assert.equal(run('rmEvents().length'),6);assert.equal(run('rmProjects().length'),2);assert(run('rmReport().text').includes('虚构演练'));run('rmUI.demo=false');assert.equal(run('rmEvents().some(e=>e.demo)'),false);
+run(`rmStore.events[0].summary='<script>attack</script>';rmStore.events[0].observations.at(-1).detail='<script>attack</script>';rmUI.event=rmStore.events[0].id`);assert(!run('rmEventPage()').includes('<script>attack'));assert(run('rmEventPage()').includes('&lt;script&gt;'));
+console.log('risk monitor: scoped enterprise dedup, missing vs zero, threshold edges, stale-data suppression, evidence gates, dedup scans, state machine, recurrence, evidence invalidation, immutable reports, storage rollback, demo isolation and escaped HTML OK');
+// A scan must land on a persistent, project-level priority order, not an alphabetical event list.
+run(`rmStore={snapshots:[],evidence:[],events:[],scans:[],reports:[]};rmUI.demo=false;rmUI.event='';rmUI.actor=rmActor();rmRefresh=()=>{};
+for(const name of ['企业丙','企业丁','企业戊'])dxPaths.push({enterprise:name,kind:'indirect',region:'sz',fundId:'F1'});
+for(const [name,cash] of [['企业甲',1],['企业乙',3],['企业丙',6],['企业丁',8]]){const id='RANK-EV-'+name;rmStore.evidence.push({id,project:name,scope:'national',demo:false,status:'verified',date:today,locator:'财报第1页',excerpt:'现金与经营核验',title:'材料'});rmStore.snapshots.push({id:'RANK-S-'+name,project:name,scope:'national',demo:false,asOf:today,at:rmNow(),refs:[id],values:{...full,cashMonths:cash}})}
+const rankedScan=rmCommit(()=>rmScan());`);
+assert.equal(run('rankedScan.ranking.map(r=>r.level).join(",")'),'red,orange,yellow,none,blue');
+assert.equal(run('rankedScan.ranking.length'),5);assert.equal(run('rankedScan.ranking[0].project'),'企业甲');assert.equal(run('rankedScan.ranking.at(-1).project'),'企业戊');
+assert.match(run('rmRanking()'),/数据不足，暂不评定/);assert.match(run('rmRanking()'),/刷新风险排序/);assert.match(run('rmRanking()'),/现金/);
+run(`rmStore.snapshots.push({...rmStore.snapshots[0],id:'NEW-RANK-S',at:rmNow(),values:{...full,cashMonths:8}})`);assert.match(run('rmRanking()'),/监测数据或处置状态已变化/);assert.equal(run('rankedScan.ranking[0].level'),'red');
+run('rmCommit(()=>rmScan())');assert.equal(run('rmLastRankScan().ranking[0].level'),'red'); // Do not silently downgrade an unclosed alert.
+run(`for(const e of rmStore.events.filter(e=>e.project==='企业甲'))e.status='已关闭';rmCommit(()=>rmScan())`);assert.equal(run('rmLastRankScan().ranking.find(r=>r.project==="企业甲").level'),'none');
+assert(run('JSON.parse(localStorage.getItem(rmKey)).scans.at(-1).ranking.length===5'));
+run("rmUI.actor='';rmUI.tab='radar';rmPage()");assert.equal(run('rmUI.tab'),'ranking');
+const click=handlers.click[0];
+(async()=>{await click({target:{closest:()=>({dataset:{rmAction:'scan'}})}});assert.equal(run('rmUI.tab'),'ranking');assert.equal(run('rmUI.event'),'');assert.match(run('rmPage()'),/项目风险等级排序/);
+run("role={...role,id:'r-new',version:'region'};rmUI.actor='';rmPage()");assert.equal(run('rmLastRankScan()'),undefined);assert(!run('rmRanking()').includes('企业乙'));console.log('risk ranking: highest priority per project, red/orange/yellow order, separate unknown data, persistent scan snapshots, refresh landing, stale warning, unclosed alerts retained, role isolation OK');})().catch(e=>{console.error(e);process.exitCode=1});

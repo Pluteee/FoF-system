@@ -1,0 +1,41 @@
+const assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('node:vm');
+const events={};let renders=0;
+const ctx=vm.createContext({console,Date,Set,Map,JSON,FormData,URL,Blob,setTimeout,document:{addEventListener:(name,cb)=>events[name]=cb,querySelector:()=>null,getElementById:()=>null},fsRender:()=>renders++,fsFlash:()=>{}});
+const run=s=>vm.runInContext(s,ctx);
+// Reuse production industry/geography classifiers, rather than a test-only scoring mirror.
+const experience=fs.readFileSync('demo/experience.js','utf8');for(const name of ['dxGeo','dxIndustry']){const start=experience.indexOf('const '+name+'=');run(experience.slice(start,experience.indexOf('\n};',start)+3))}
+run(`let account={id:'region-a',version:'region'};const fsAccount=()=>account,fsState={tab:'deals'},fsRegion={id:'sz'};
+const fsE=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const deals=[{id:'A',region:'sz',name:'参照甲',sector:'工业软件',summary:'工业软件研发与平台服务',place:'广东省深圳市',origin:'source'},{id:'B',region:'sz',name:'候选乙',sector:'工业软件',summary:'工业软件研发与平台服务',place:'广东省深圳市'},{id:'C',region:'sz',name:'候选乙',sector:'工业软件',summary:'重复档案',place:'深圳'},{id:'X',region:'sh',name:'其他区域企业',sector:'工业软件',summary:'工业软件研发'}];
+const prospects=[{id:'P1',kind:'企业项目',name:'储备丙',sector:'工业软件',next:'工业软件研发与平台服务',place:'深圳',stage:'尽调'},{id:'P2',kind:'企业项目',name:'已终止',sector:'工业软件',stage:'终止'},{id:'P3',kind:'基金机会',name:'某基金',sector:'工业软件',stage:'尽调'},{id:'P4',kind:'企业项目',name:'已暂缓',sector:'工业软件',stage:'暂缓'},{id:'P5',kind:'企业项目',name:'候选乙',sector:'工业软件',next:'软件研发',stage:'接洽中'}];
+const dxRegionDeals=id=>deals.filter(x=>x.region===id),foAll=()=>prospects;function fsDirectProjects(){return '<header>直投项目管理</header><section class="fs-card">table</section>'}
+`);
+run(fs.readFileSync('demo/workflow-recommendations.js','utf8'));
+run('srSync()');assert.ok(run('fsDirectProjects()').includes('AI推荐类似项目'));
+const original=run('JSON.stringify({deals,prospects})');
+assert.throws(()=>run('srAnalyze()'),/选择/);
+run("srState.selected=['archive:A'];srState.open=true");
+assert.equal(run('srArchives().length'),2);
+assert.equal(run('srCandidates(srSeeds()).length'),2);
+assert.equal(run('srCandidates(srSeeds()).find(x=>x.name===\'候选乙\').sources.length'),2);
+assert.ok(!run('JSON.stringify(srCandidates(srSeeds()))').includes('其他区域企业'));
+const result=run('srAnalyze()');assert.equal(result.seeds.length,1);assert.equal(result.rows.length,2);assert.ok(result.rows.every(x=>x.name!=='参照甲'));
+assert.equal(run('JSON.stringify({deals,prospects})'),original);
+assert.ok(run('srResults()').includes('材料缺口与核查提纲'));
+assert.ok(run('srWorkspace()').includes('投资依据待补'));
+run("srState.pool='reserve'");assert.ok(run('srResults()').includes('重新生成'));
+assert.equal(run('srCandidates(srSeeds()).length'),2);
+run("srState.pool='archive'");assert.equal(run('srCandidates(srSeeds()).length'),1);
+run("srState.mode='manual';srState.manual={name:'已投企业',sector:'工业软件',summary:'工业软件研发',place:'深圳',basis:''}");assert.throws(()=>run('srAnalyze()'),/投资依据/);
+run("srState.manual.basis='交割凭证2026-01-01';srState.pool='all'");assert.equal(run('srAnalyze().seeds[0].source'),'用户录入的已投参照 · 依据待核验');
+run("srState.manual.name='<img src=x onerror=alert(1)>'");assert.ok(!run('srWorkspace()').includes('<img src=x'));assert.ok(run('srWorkspace()').includes('&lt;img'));
+run("srState.mode='demo'");assert.equal(run('srAnalyze().candidateCount'),4);assert.ok(run('srAnalyze().rows.length')>=2);assert.ok(run('srAnalyze().rows.every(x=>x.key.startsWith(\'sample:\'))'));
+assert.equal(run('JSON.stringify({deals,prospects})'),original);
+const unknown=run("srPair({sector:'待补充',summary:'',place:'待补充'},{sector:'待补充',summary:'',place:'待补充'},'industry')");assert.equal(unknown.score,0);
+assert.equal(run("srPair({sector:'工业软件',summary:'工业软件研发',place:'深圳'},{sector:'工业软件',summary:'工业软件研发',place:'深圳'},'industry').score"),100);
+assert.equal(run("srPair({sector:'工业软件'},{sector:'工业软件'},'industry').score"),55);
+assert.equal(run("srPair({sector:'工业软件'},{sector:'工业软件'},'technology').score"),25);
+run("srState.open=true;account={id:'region-b',version:'region'};srSync()");assert.equal(run('srState.open'),false);assert.equal(run('srState.result'),null);assert.equal(run('srState.manual.name'),'');
+run("account={id:'fund-a',version:'fund'}");assert.throws(()=>run('srAnalyze()'),/区域/);assert.ok(!run('fsDirectProjects()').includes('AI推荐类似项目'));
+assert.ok(fs.readFileSync('demo/workflow-bootstrap.js','utf8').includes("lifecycle.onload=()=>"));
+console.log('Recommendation matching, source deduplication, missing-data scoring, scope isolation and no registry mutation passed.');

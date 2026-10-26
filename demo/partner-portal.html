@@ -1,0 +1,14 @@
+<!doctype html>
+<html lang="zh-CN">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>跳转协同工作台</title></head>
+<body>
+  <p>正在进入协同工作台… <a id="fallback" href="index.html">如未跳转，请返回主页面</a></p>
+  <script>
+    const destination=new URL('index.html',location.href);
+    destination.search=location.search;
+    destination.searchParams.set('workspace','partner');
+    document.getElementById('fallback').href=destination.href;
+    location.replace(destination.href);
+  </script>
+</body>
+</html>
