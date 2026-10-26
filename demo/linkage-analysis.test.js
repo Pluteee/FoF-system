@@ -2,7 +2,7 @@ const fs=require('node:fs'),vm=require('node:vm'),assert=require('node:assert/st
 const store=new Map(),ctx=vm.createContext({console,URLSearchParams,location:{search:''},state:{view:'test'},window:{},localStorage:{getItem:k=>store.get(k)||null,setItem:(k,v)=>store.set(k,v)},document:{addEventListener(){},getElementById(){return null}},escapeHTML:v=>String(v??'').replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;')});
 const run=s=>vm.runInContext(s,ctx);
 for(const f of ['source-data.js','scenario-data.js'])vm.runInContext(fs.readFileSync(__dirname+'/'+f,'utf8'),ctx);
-run(`const dxRegions=[{id:'shenzhen',city:'深圳',short:'湾区基金'},{id:'shanghai',city:'上海',short:'申澜区域母基金（演示）'},{id:'beijing',city:'北京',short:'燕序区域母基金（演示）'}];
+run(`const dxRegions=[{id:'shenzhen',city:'深圳',short:'湾区基金'},{id:'shanghai',city:'上海',short:'长三角基金'},{id:'beijing',city:'北京',short:'京津冀基金'}];
  const dxRegion=id=>dxRegions.find(r=>r.id===id),dxDealCompany=s=>s.replace(/（第二轮）$/,''),dxMoney=(n,d=2)=>Number(n).toFixed(d);
  const dxFunds=[...sourceWorkbook.funds.map(f=>({...f,region:'shenzhen'})),...demoScenario.funds],dxDeals=[...sourceWorkbook.deals.map(d=>({...d,region:'shenzhen'})),...demoScenario.deals],dxPaths=JSON.parse(JSON.stringify(demoScenario.paths));
  function nrPanel(){return '<section id="nationalRiskLinkage"><h2>风险分析</h2>原有任务内容</section>'};function nrNational(){return true};

@@ -1,0 +1,16 @@
+/* Shared identity across the national dashboard and all role workspaces. */
+.dili-mark{display:block;width:42px;height:42px;flex:0 0 auto;object-fit:contain;filter:drop-shadow(0 5px 9px #041a2e24)}
+.brand .brand-mark{width:42px;height:42px;flex:0 0 42px;background:none;border-radius:13px;box-shadow:none;overflow:visible}
+.brand{gap:12px;align-items:center}
+.brand strong{font-size:21px;font-weight:750;letter-spacing:.02em;line-height:1.25;white-space:nowrap}
+.brand span{font-size:10px;letter-spacing:.03em;margin-top:6px;color:#8faec8}
+.fs-side-brand,.pp-brand{align-items:center;gap:12px}
+.fs-side-brand>.dili-mark,.pp-brand>.dili-mark{width:40px;height:40px}
+.fs-body .fs-side-brand b,.pp-app .pp-brand b{font-size:20px;line-height:1.25;font-weight:750;letter-spacing:.02em;white-space:nowrap}
+.fs-side-brand small,.pp-brand small{margin-top:5px;letter-spacing:.025em}
+.fs-login-top>.dili-mark{width:44px;height:44px;margin-right:2px}
+.fs-login-top>div>b{font-size:20px;letter-spacing:.015em}
+.entry-brand>.dili-mark{width:44px;height:44px;background:none;border-radius:0}
+.entry-brand>div>b{font-size:22px;letter-spacing:.02em}
+@media(max-width:1000px){.brand{padding:0 4px 26px;justify-content:center}.brand .brand-mark,.brand .dili-mark{width:40px;height:40px;flex-basis:40px}}
+@media(max-width:760px){.lc-region .fs-side-brand>.dili-mark{width:36px;height:36px}.lc-region .fs-side-brand b{font-size:19px}.fs-login-top>div>b{font-size:16px}.fs-login-top>.dili-mark{width:38px;height:38px}}

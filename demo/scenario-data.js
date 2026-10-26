@@ -1,10 +1,10 @@
-// 公开虚构情景。区域基金、管理机构、企业、金额及投资关系均为演示，不代表真实投资。
+// 区域母基金名称及管理团队采用公开信息；业务数值、子基金、企业及投资关系均为虚构演示。
 const demoScenario = {
   asOf: '2026-10-16',
   regions: {
-    shenzhen: { manager:'演示·鹏湾母基金管理机构', strategy:'硬科技、早期与湾区协同', phase:'投资期', established:'2025-12-22', commitment:120, paid:36, annualPlan:24, annualInvestPlan:18, reportDate:'2026-09-30', investors:'国家引导基金、区域出资人与社会资本（结构演示）' },
-    shanghai: { manager:'演示·申澜母基金管理机构', strategy:'集成电路、生物医药与未来产业', phase:'投资期', established:'2025-12-23', commitment:110, paid:30, annualPlan:22, annualInvestPlan:16, reportDate:'2026-09-30', investors:'国家引导基金、长三角区域出资人与社会资本（结构演示）' },
-    beijing: { manager:'演示·燕序母基金管理机构', strategy:'人工智能、先进制造与科技成果转化', phase:'投资期', established:'2025-12-24', commitment:115, paid:32, annualPlan:23, annualInvestPlan:17, reportDate:'2026-09-30', investors:'国家引导基金、京津冀区域出资人与社会资本（结构演示）' }
+    shenzhen: { manager:'深创投集团', strategy:'硬科技、早期与湾区协同', phase:'投资期', established:'2025-12-22', commitment:120, paid:36, annualPlan:24, annualInvestPlan:18, reportDate:'2026-09-30', investors:'国家引导基金、区域出资人与社会资本（结构演示）' },
+    shanghai: { manager:'国投创合', strategy:'集成电路、生物医药与未来产业', phase:'投资期', established:'2025-12-23', commitment:110, paid:30, annualPlan:22, annualInvestPlan:16, reportDate:'2026-09-30', investors:'国家引导基金、长三角区域出资人与社会资本（结构演示）' },
+    beijing: { manager:'中金资本', strategy:'人工智能、先进制造与科技成果转化', phase:'投资期', established:'2025-12-24', commitment:115, paid:32, annualPlan:23, annualInvestPlan:17, reportDate:'2026-09-30', investors:'国家引导基金、京津冀区域出资人与社会资本（结构演示）' }
   },
   funds: [
     {id:'DMF-SH-01',region:'shanghai',name:'长三角先导集成电路创业投资基金（演示）',manager:'申浦科创投资管理（演示）',sector:'集成电路',place:'上海市浦东新区',size:8,request:2.4},

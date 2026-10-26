@@ -2,7 +2,7 @@ const fs=require('node:fs'),vm=require('node:vm'),assert=require('node:assert/st
 const store=new Map();let storageFail=false;
 const ctx=vm.createContext({console,localStorage:{getItem:k=>store.get(k)||null,setItem:(k,v)=>{if(storageFail)throw Error('quota');store.set(k,v)}},document:{addEventListener(){}},labels:{},renderers:{},escapeHTML:v=>String(v??'').replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;')});
 const run=s=>vm.runInContext(s,ctx);
-run(`const dxRegions=[{id:'shenzhen',city:'深圳',short:'湾区基金'},{id:'shanghai',city:'上海',short:'申澜区域母基金（演示）'}],dxFunds=[{id:'F1',name:'样例子基金甲',region:'shenzhen',request:99},{id:'F2',name:'样例子基金乙',region:'shenzhen',request:99},{id:'F3',name:'外区域基金',region:'shanghai',request:99}],dxPaths=[];
+run(`const dxRegions=[{id:'shenzhen',city:'深圳',short:'湾区基金'},{id:'shanghai',city:'上海',short:'长三角基金'}],dxFunds=[{id:'F1',name:'样例子基金甲',region:'shenzhen',request:99},{id:'F2',name:'样例子基金乙',region:'shenzhen',request:99},{id:'F3',name:'外区域基金',region:'shanghai',request:99}],dxPaths=[];
  const dxRegion=id=>dxRegions.find(r=>r.id===id),dxMoney=(n,d=2)=>Number(n).toFixed(d),wbRecords=[];
 `);
 vm.runInContext(fs.readFileSync(__dirname+'/performance.js','utf8'),ctx);

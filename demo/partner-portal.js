@@ -3,9 +3,9 @@
 const ppKey='diki-public-demo-reporting-v1';
 const ppParams=new URLSearchParams(window.location.search);
 const ppRegions=[
-  {id:'shenzhen',city:'深圳',name:'演示·鹏湾区域母基金'},
-  {id:'shanghai',city:'上海',name:'演示·申澜区域母基金'},
-  {id:'beijing',city:'北京',name:'演示·燕序区域母基金'}
+  {id:'shenzhen',city:'深圳',name:'粤港澳大湾区创业投资引导基金'},
+  {id:'shanghai',city:'上海',name:'长三角创业投资引导基金'},
+  {id:'beijing',city:'北京',name:'京津冀创业投资引导基金'}
 ];
 const ppFunds=[...sourceWorkbook.funds.map(f=>({...f,region:'shenzhen'})),...demoScenario.funds];
 const ppProjects=[...sourceWorkbook.deals.map(d=>({...d,region:'shenzhen'})),...demoScenario.deals];

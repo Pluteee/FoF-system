@@ -4,8 +4,8 @@ const sourceWorkbook = {
   "asOf": "2026-09-30",
   "fileName": "synthetic-public-demo-v1",
   "unit": "亿元",
-  "disclosure": "全部机构、企业、金额、业务描述及关系均为虚构演示，不对应真实投资资料。",
-  "parent": "演示·鹏湾区域母基金",
+  "disclosure": "区域母基金名称为公开信息；子基金、企业、金额、业务描述及关系均为虚构演示。",
+  "parent": "粤港澳大湾区创业投资引导基金",
   "controls": {
     "funds": {
       "count": 34,

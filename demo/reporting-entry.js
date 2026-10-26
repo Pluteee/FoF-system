@@ -3,7 +3,7 @@ const entryParams=new URLSearchParams(window.location.search);
 const entryType=entryParams.get('type');
 const entryTarget=entryParams.get('target');
 const entryPeriod=entryParams.get('period');
-const entryRegions={shenzhen:{city:'深圳',name:'演示·鹏湾区域母基金'},shanghai:{city:'上海',name:'演示·申澜区域母基金'},beijing:{city:'北京',name:'演示·燕序区域母基金'}};
+const entryRegions={shenzhen:{city:'深圳',name:'粤港澳大湾区创业投资引导基金'},shanghai:{city:'上海',name:'长三角创业投资引导基金'},beijing:{city:'北京',name:'京津冀创业投资引导基金'}};
 const entryFund=[...sourceWorkbook.funds,...demoScenario.funds].find(f=>f.id===entryTarget);
 const entryValidPeriod=['2026-Q3','2026-Q4','2026-Y'].includes(entryPeriod);
 const entryValid=(entryType==='region'&&entryRegions[entryTarget]||entryType==='fund'&&entryFund)&&entryValidPeriod;

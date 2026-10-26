@@ -7,9 +7,9 @@ labels.projects='直投项目';
 labels.lookthrough='穿透管理';
 
 const coreRegions=[
-  {id:'shenzhen',city:'深圳',label:'演示·鹏湾区域母基金',hasWorkbook:true,source:'source-data.js'},
-  {id:'shanghai',city:'上海',label:'演示·申澜区域母基金',hasWorkbook:false,source:'scenario-data.js'},
-  {id:'beijing',city:'北京',label:'演示·燕序区域母基金',hasWorkbook:false,source:'scenario-data.js'}
+  {id:'shenzhen',city:'深圳',label:'粤港澳大湾区创业投资引导基金',hasWorkbook:true,source:'https://fgw.sz.gov.cn/zwgk/qt/gzdt/content/post_12639565.html'},
+  {id:'shanghai',city:'上海',label:'长三角创业投资引导基金',hasWorkbook:false,source:'https://www.ndrc.gov.cn/xwdt/xwfb/202512/t20251226_1402664.html'},
+  {id:'beijing',city:'北京',label:'京津冀创业投资引导基金',hasWorkbook:false,source:'https://www.beijing.gov.cn/ywdt/zwzt/jjjyth/zljj/202604/t20260420_4595856.html'}
 ];
 const coreState={region:'shenzhen',regionTab:'overview',fundQuery:'',fundSector:'全部',fundPlace:'全部',fundSort:'source',dealQuery:'',dealSector:'全部',dealPlace:'全部',dealSort:'source',lookQuery:'',lookRegion:'全部',lookSector:'全部'};
 const coreRegion=()=>coreRegions.find(x=>x.id===coreState.region);
@@ -18,7 +18,7 @@ const coreDeals=()=>coreRegion().hasWorkbook?sourceWorkbook.deals:demoScenario.d
 const coreMoney=n=>Number(n).toLocaleString('zh-CN',{minimumFractionDigits:2,maximumFractionDigits:4});
 const coreSum=(rows,key)=>rows.reduce((total,row)=>total+(Number(row[key])||0),0);
 const coreCompany=name=>name.replace(/（第二轮）$/,'');
-const workbookHref='source-data.js';
+const workbookHref='source-data.js?v=20261026-dili';
 const coreProfileKey='diki-public-fof-regional-profile-v2';
 const coreReviewKey='diki-public-fof-core-review-v1';
 let coreProfiles={},coreReviews={};
@@ -66,10 +66,10 @@ function coreRegionComparison(){
 }
 function renderCoreDashboard(){
   const fs=sourceWorkbook.funds,ds=sourceWorkbook.deals;
-  host('dashboard').innerHTML=`${coreHeader('DIKI·FoF / REGIONAL OVERVIEW','三只区域母基金','深圳、上海、北京三地入口，对应粤港澳大湾区、长三角、京津冀三只正式命名的区域基金。','1 地原始清单 · 2 地演示台账')}
+  host('dashboard').innerHTML=`${coreHeader('DILI·FoF / REGIONAL OVERVIEW','三只区域母基金','深圳、上海、北京三地入口，对应粤港澳大湾区、长三角、京津冀三只正式命名的区域基金。','1 地原始清单 · 2 地演示台账')}
     ${coreRegionCards()}
     <div class="core-path"><span>国家创业投资引导基金</span><i>→</i>${coreRegions.map(r=>`<button data-core-open-region="${r.id}">${r.city} · ${r.label}</button>`).join('<span>/</span>')}<i>→</i><span>子基金 / 区域直投 → 企业</span></div>
-    ${coreCaveat('深圳 Excel 整体作为鹏湾区域母基金（演示）的立项/申请资料；投资对象注册地不决定区域归属。上海、北京业务台账和三地资金、子基金底层投资关系均为演示数据。深圳演示样本金额列未标单位，页面暂按亿元排版，不能视作正式披露。')}
+    ${coreCaveat('深圳 Excel 整体作为粤港澳大湾区基金的立项/申请资料；投资对象注册地不决定区域归属。上海、北京业务台账和三地资金、子基金底层投资关系均为演示数据。深圳演示样本金额列未标单位，页面暂按亿元排版，不能视作正式披露。')}
     <div class="core-metrics">${coreMetric('区域母基金',3,'只','三只公开命名基金')}${coreMetric('虚构立项清单',1,'地','仅深圳；非运营报表')}${coreMetric('深圳子基金立项',fs.length,'支','原始工作表')}${coreMetric('深圳直投申请',ds.length,'笔',coreDealGroups(ds).size+' 家去重企业')}</div>
     <div class="core-two">${corePanel('深圳 / INVESTMENT ENTRY','深圳区域当前可见的投资清单','仅列演示样本申请与拟设规模，不代表已投或已支付。',`<div class="core-region-facts"><span>子基金申请出资 <b>${coreMoney(coreSum(fs,'request'))}</b></span><span>直投申请出资 <b>${coreMoney(coreSum(ds,'request'))}</b></span><span>区域基金实缴 <b>真实凭证待接入</b></span></div>`,coreLink('region','查看深圳区域档案'))}
       ${corePanel('DATA COVERAGE','演示资料与业务口径','领导看到的数字必须能追溯来源。',`<div class="core-status-list"><div><b>原始</b><span>深圳子基金 34 支立项、直投 38 笔申请</span></div><div><b>演示</b><span>三地资金状态、上海/北京台账、底层投资路径</span></div><div><b>待核</b><span>真实协议、实缴、GP 底层报送、交割和投后收益</span></div></div>`,coreLink('lookthrough','查看穿透演示'))}</div>
@@ -119,7 +119,7 @@ function renderCoreRegion(){
   const body={overview:coreOverview,capital:coreCapital,investment:coreInvestment,governance:coreGovernance,reporting:coreReporting}[coreState.regionTab]();
   host('region').innerHTML=`${coreHeader('REGIONAL FUND / THREE REGIONS','区域母基金','深圳、上海、北京是管理入口；三只基金使用公开名称，资金和缺失的业务资料以模拟数据演示。',r.hasWorkbook?'深圳演示样本截至 2026-09-30':'当前区域为演示台账')}
     ${coreRegionSwitch()}
-    <div class="core-caveat"><span>数据分层</span><p>三只区域基金采用公开通用名称；深圳 Excel 整体归入鹏湾区域母基金（演示）的立项/申请清单。除公开名称与公开管理机构外，当前区域档案中的资金、计划、阶段和穿透关系均为演示，最终以协议和报送资料核准。</p><a href="${r.source}" target="_blank" rel="noopener">名称来源 ↗</a></div>
+    <div class="core-caveat"><span>数据分层</span><p>三只区域基金采用公开通用名称；深圳 Excel 整体归入粤港澳大湾区基金的立项/申请清单。除公开名称与公开管理机构外，当前区域档案中的资金、计划、阶段和穿透关系均为演示，最终以协议和报送资料核准。</p><a href="${r.source}" target="_blank" rel="noopener">名称来源 ↗</a></div>
     ${coreTabs()}<div class="core-tab-content">${body}</div>`;
 }
 function coreFundRows(){
@@ -141,7 +141,7 @@ function coreFundTable(){
 function renderCoreFunds(){
   const fs=coreFunds(),has=coreRegion().hasWorkbook;
   host('funds').innerHTML=`${coreHeader('SUB-FUND / APPLICATION','子基金','按所属区域母基金查看子基金与管理人；拟注册地是独立属性。',has?'深圳演示样本截至 2026-09-30':'上海/北京 · 模拟台账')}${coreRegionSwitch()}
-    <div class="core-caveat"><span>${has?'虚构立项':'演示数据'}</span><p>${has?'整张深圳演示样本归属鹏湾区域母基金（演示）；演示样本金额未标单位，暂按亿元展示。申请不等于实缴。':'这些基金、管理人和金额均为模拟，不代表已真实设立或投资。'}</p></div>
+    <div class="core-caveat"><span>${has?'虚构立项':'演示数据'}</span><p>${has?'整张深圳演示样本归属粤港澳大湾区基金；演示样本金额未标单位，暂按亿元展示。申请不等于实缴。':'这些基金、管理人和金额均为模拟，不代表已真实设立或投资。'}</p></div>
     <div class="core-metrics">${coreMetric(has?'立项子基金':'演示子基金',fs.length,'支',has?'虚构立项':'模拟')}${coreMetric('拟设总规模',coreMoney(coreSum(fs,'size')),'亿元',has?'演示样本金额单位待核':'模拟')}${coreMetric(has?'申请出资':'演示拟出资',coreMoney(coreSum(fs,'request')),'亿元',has?'非实缴':'模拟')}${coreMetric('管理人',new Set(fs.map(x=>x.manager)).size,'家',has?'按演示样本名称去重':'模拟')}</div>
     <div class="core-filter"><label>检索<input id="coreFundQuery" value="${escapeHTML(coreState.fundQuery)}" placeholder="基金、管理人、策略"></label><label>投资策略<select id="coreFundSector">${coreOptions(fs.map(x=>x.sector),coreState.fundSector)}</select></label><label>拟注册地<select id="coreFundPlace">${coreOptions(fs.map(x=>x.place),coreState.fundPlace)}</select></label><label>排序<select id="coreFundSort"><option value="source" ${coreState.fundSort==='source'?'selected':''}>清单顺序</option><option value="request" ${coreState.fundSort==='request'?'selected':''}>拟出资从高到低</option><option value="size" ${coreState.fundSort==='size'?'selected':''}>总规模从高到低</option></select></label></div>
     ${corePanel(has?'EXCEL / 子基金 A3:G36':'DEMO / 子基金','子基金台账','注册地不决定区域母基金归属。',`<div id="coreFundTable">${coreFundTable()}</div>`)}
@@ -162,7 +162,7 @@ function coreDealTable(){
 function renderCoreProjects(){
   const ds=coreDeals(),has=coreRegion().hasWorkbook;
   host('projects').innerHTML=`${coreHeader('DIRECT INVESTMENT / APPLICATION','直投项目','按区域基金管理直投，并区分企业去重与多轮融资。',has?'深圳演示样本截至 2026-09-30':'上海/北京 · 模拟台账')}${coreRegionSwitch()}
-    <div class="core-caveat"><span>${has?'虚构申请':'演示数据'}</span><p>${has?'深圳演示样本整体归属鹏湾区域母基金（演示），企业注册地不决定母基金归属；金额单位待核，申请不等于交割。':'企业、金额、投资路径均为模拟，不代表真实投资。'}</p></div>
+    <div class="core-caveat"><span>${has?'虚构申请':'演示数据'}</span><p>${has?'深圳演示样本整体归属粤港澳大湾区基金，企业注册地不决定母基金归属；金额单位待核，申请不等于交割。':'企业、金额、投资路径均为模拟，不代表真实投资。'}</p></div>
     <div class="core-metrics">${coreMetric(has?'直投申请':'演示直投',ds.length,'笔',has?'逐行 / 逐轮次':'模拟')}${coreMetric('去重企业',coreDealGroups(ds).size,'家',has?'第二轮后缀合并':'模拟')}${coreMetric('本轮融资规模',coreMoney(coreSum(ds,'round')),'亿元',has?'演示样本金额单位待核':'模拟')}${coreMetric(has?'申请出资额':'演示拟出资',coreMoney(coreSum(ds,'request')),'亿元',has?'非已交割':'模拟')}</div>
     <div class="core-filter"><label>检索<input id="coreDealQuery" value="${escapeHTML(coreState.dealQuery)}" placeholder="企业、核心技术、行业"></label><label>行业<select id="coreDealSector">${coreOptions(ds.map(x=>x.sector),coreState.dealSector)}</select></label><label>企业注册地<select id="coreDealPlace">${coreOptions(ds.map(x=>x.place),coreState.dealPlace)}</select></label><label>排序<select id="coreDealSort"><option value="source" ${coreState.dealSort==='source'?'selected':''}>清单顺序</option><option value="request" ${coreState.dealSort==='request'?'selected':''}>拟出资从高到低</option><option value="round" ${coreState.dealSort==='round'?'selected':''}>融资规模从高到低</option></select></label></div>
     ${corePanel(has?'EXCEL / 直投项目 A3:G40':'DEMO / 直投项目','直投项目台账','按所属区域与资料来源区分。',`<div id="coreDealTable">${coreDealTable()}</div>`)}
