@@ -29,11 +29,12 @@ for directory in [root / "demo", root / "scripts"]:
         target.parent.mkdir(parents=True, exist_ok=True)
         shutil.copyfile(file, target)
         count += 1
-for name in ["README.md", ".gitignore"]:
+root_files = ["README.md", ".gitignore", "index.html"]
+for name in root_files:
     shutil.copyfile(root / name, destination / name)
 archive = output / "public-demo.zip"
 with zipfile.ZipFile(archive, "w", compression=zipfile.ZIP_DEFLATED) as bundle:
     for file in sorted(destination.rglob("*")):
         if file.is_file():
             bundle.write(file, file.relative_to(destination).as_posix())
-print(f"Created public-release/public-demo/ and public-release/public-demo.zip ({count + 2} files).")
+print(f"Created public-release/public-demo/ and public-release/public-demo.zip ({count + len(root_files)} files).")
